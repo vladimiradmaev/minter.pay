@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS `minter_pay_transactions`;
