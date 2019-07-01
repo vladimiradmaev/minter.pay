@@ -3,7 +3,9 @@
 namespace Minter\Pay\Components;
 
 use Bitrix\Main\Config\Option;
+use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
+use Bitrix\Main\Page\Asset;
 use GuzzleHttp\Exception\RequestException;
 use Minter\Pay\MinterAPI;
 
@@ -35,6 +37,8 @@ class MinterPay extends \CBitrixComponent
      */
     public function executeComponent()
     {
+        \CJSCore::Init(['jquery']);
+        //Asset::getInstance()->addCss("/bitrix/css/main/bootstrap.min.css");
         $this->arResult['WALLET'] = Option::get($this->sModuleId, "WALLET");
 
         $this->includeComponentTemplate();
@@ -48,6 +52,8 @@ class MinterPay extends \CBitrixComponent
      */
     public function getWalletBalance($sWallet)
     {
+        Loader::includeModule('minter.pay');
+
         $arResult = [];
         if ($sWallet) {
             try {
@@ -56,7 +62,32 @@ class MinterPay extends \CBitrixComponent
                 foreach ($oResponseApi->data->balances as $oBalance) {
                     $arResult['WALLET_INFO']['COINS'][$oBalance->coin] = $oBalance->amount;
                 }
-                $arResult['WALLET_INFO'] = $oResponseApi;
+            } catch (RequestException $exception) {
+                if ($exception->getCode() == 422) {
+                    $arResult['ERRORS'] = Loc::getMessage("MINTER_PAY_WALLET_ERROR_WRONG_WALLET");
+                }
+            }
+        } else {
+            $arResult = ['ERRORS' => Loc::getMessage("MINTER_PAY_WALLET_ERROR_EMPTY_WALLET")];
+        }
+        return $arResult;
+    }
+
+    /**
+     * Получение курса выбранной монеты
+     * @param $sCoin
+     * @return array
+     * @throws \Bitrix\Main\LoaderException
+     */
+    public function getCoinRate($sCoin)
+    {
+        Loader::includeModule('minter.pay');
+
+        $arResult = [];
+        if ($sCoin) {
+            try {
+                $oApi = new MinterAPI('https://minterscan.pro');
+                $arResult['COIN_RATE'] = $oApi->getRate($sCoin, 'BIP')->result->will_get;
             } catch (RequestException $exception) {
                 $arResult['ERRORS'] = $exception->getMessage();
             }

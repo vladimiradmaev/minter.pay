@@ -41,4 +41,22 @@ class MinterAPI extends \Minter\MinterAPI
     {
         return $this->get('/api/v1/addresses/' . $address);
     }
+
+    /**
+     * Получение курса выбранной монеты
+     * @param string $sCoin
+     * @param string $sCoinToBuy
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getRate(string $sCoin, string $sCoinToBuy): \stdClass
+    {
+        $arParams = [
+            'coin_to_sell' => $sCoin,
+            'value_to_sell' => 1,
+            'coin_to_buy' => $sCoinToBuy
+        ];
+
+        return $this->get('/explorer/estimate_coin_sell', $arParams);
+    }
 }

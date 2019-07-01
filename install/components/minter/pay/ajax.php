@@ -17,15 +17,26 @@ $oApp = Application::getInstance();
 $oRequest = $oApp->getContext()->getRequest();
 
 if ($oRequest->isAjaxRequest() && check_bitrix_sessid()) {
-
     try {
         $oComponent = new \CBitrixComponent();
         $oComponent->initComponent('minter:pay');
         $oComponentClass = new MinterPay($oComponent);
         $sAction = $oRequest->get('ACTION');
-        $arParams = $oRequest->get('PARAMS');
         switch ($sAction) {
-            default:
+            case 'getWalletCoins':
+                $sWallet = $oRequest->get('WALLET');
+                if ($sWallet) {
+                    $oComponentClass->onPrepareComponentParams($arParams);
+                    $arResult = $oComponentClass->getWalletBalance($sWallet);
+                } else {
+                    throw new Exception('Не указан кошелёк Minter');
+                }
+                break;
+            case 'getCoinRate':
+                $oComponentClass->onPrepareComponentParams($arParams);
+                $arResult = $oComponentClass->getCoinRate($oRequest->get('COIN'));
+                break;
+            case 'pay':
                 $oComponentClass->onPrepareComponentParams($arParams);
                 break;
         }

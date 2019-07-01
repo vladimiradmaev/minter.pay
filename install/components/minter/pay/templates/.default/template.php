@@ -1,23 +1,35 @@
-<button class="btn btn-primary" id="minter-pay">Оплатить через Minter</button>
+<button class="btn btn-open" id="minter-pay">Оплатить через Minter</button>
 <div id="modal_form">
     <span id="modal_close">X</span>
-    <div class="form-group text-center">
+    <div class="form-group">
         <label for="wallet">Кошелёк</label>
         <textarea class="form-control" id="wallet"></textarea>
     </div>
-    <div class="form-group text-center hidden coins">
+    <div id="coins-wrapper" class="form-group hidden">
         <label for="coins">Доступные монеты</label>
         <select id="coins"></select>
     </div>
-    <div class="form-group text-center hidden coins-rate">
-        <span class="coin-rate"></span>
+    <div id="coin-rate-wrapper" class="form-group text-center hidden">
+        <span id="coin-rate"></span>
     </div>
     <div class="form-group text-center">
-        <p class="response"></p>
+        <p id="response"></p>
     </div>
-    <button class="btn btn-success">Получить информацию о кошельке</button>
-    <button class="btn btn-success hidden" id="agree">Подтвердить</button>
-    <button class="btn btn-warning" id="cancel">Отмена</button>
+    <button class="btn btn-success" id="load-wallet">Получить информацию о кошельке</button>
+    <div class="form-group text-center"></div>
+    <div class="btn-wrapper">
+        <button class="btn btn-success hidden" id="pay">Подтвердить</button>
+        <button class="btn btn-warning" id="cancel">Отмена</button>
+    </div>
 </div>
 
 <div id="overlay"></div>
+
+<script>
+    BX.ready(function () {
+        var arParams = <?=CUtil::PhpToJSObject([
+            'AJAX_PATH' => $componentPath . '/ajax.php'
+        ])?>;
+        new BX.Minter.Pay(arParams);
+    });
+</script>
